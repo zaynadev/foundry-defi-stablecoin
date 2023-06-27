@@ -6,6 +6,7 @@ import "forge-std/Script.sol";
 import {DecentralizedStableCoin} from "../src/DecentralizedStableCoin.sol";
 import {DSCEngine} from "../src/DSCEngine.sol";
 import {HelperConfig} from "./HelperConfig.s.sol";
+import "forge-std/console.sol";
 
 contract DeployDSC is Script {
     address[] public tokenAddresses;
