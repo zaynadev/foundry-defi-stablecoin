@@ -28,6 +28,7 @@ contract DSCEngine is ReentrancyGuard {
     ////////////////
     error DSCEngine__NeedsMoreThanZero();
     error DSCEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
+    error DSCEngine__TokenNotAllowed(address token);
     error DSCEngine__NotAllowedToken();
     error DSCEngine__TransferFailed();
     error DSCEngine__BreaksHealthFactor(uint256 healthFactorValue);
@@ -253,21 +254,12 @@ contract DSCEngine is ReentrancyGuard {
     /// Private & internal  view functions ////
     ///////////////////////////////////////////
 
-    function _getAccountInformation(address user)
-        private
-        view
-        returns (uint256 totalDscMinted, uint256 collateralValueInUsd)
-    {
-        totalDscMinted = s_DSCMinted[user];
-        collateralValueInUsd = getAccountCollateralValue(user);
-    }
-
     /**
      * Returns how close to liquidate a user is
      * If a user  goes below 1, then they can get liquidated
      */
     function _healthFactor(address user) private view returns (uint256) {
-        (uint256 totalDscMinted, uint256 collateralValueInUsd) = _getAccountInformation(user);
+        (uint256 totalDscMinted, uint256 collateralValueInUsd) = getAccountInformation(user);
         uint256 collateralAdjustedForThreshold = (collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
         return (collateralAdjustedForThreshold * PRECISION) / totalDscMinted;
     }
@@ -281,6 +273,15 @@ contract DSCEngine is ReentrancyGuard {
     ////////////////////////////////////////////
     /// Public & External view functions //////
     ///////////////////////////////////////////
+
+    function getAccountInformation(address user)
+        public
+        view
+        returns (uint256 totalDscMinted, uint256 collateralValueInUsd)
+    {
+        totalDscMinted = s_DSCMinted[user];
+        collateralValueInUsd = getAccountCollateralValue(user);
+    }
 
     function getTokenAmountFromUsd(address token, uint256 usdAmountInWei) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
